@@ -8,7 +8,7 @@
         _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
         (function() {
             var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-            g.async=true; g.src='https://matomo-eu-west-1.stage.rewardsplus.capillarytech.com/js/container_IydHA6TZ.js'; // Update your Matomo URL here
+            g.async=true; g.src='https://matomo-eu-west-1.stage.rewardsplus.capillarytech.com/js/container_IydHA6TZ.js';
             s.parentNode.insertBefore(g,s);
         })();
         
@@ -18,6 +18,24 @@
             console.log('MTM Data Layer Push:', JSON.stringify(obj, null, 2));
             return window.originalMtmPush.apply(this, arguments);
         };
+        
+        // Check if Matomo Tag Manager loads correctly
+        (function() {
+            var checkMatomo = setInterval(function() {
+                if (typeof window.matomoTagManager !== 'undefined') {
+                    console.log('Matomo Tag Manager loaded successfully!');
+                    clearInterval(checkMatomo);
+                }
+            }, 500);
+            
+            // Stop checking after 10 seconds to avoid infinite loop
+            setTimeout(function() {
+                clearInterval(checkMatomo);
+                if (typeof window.matomoTagManager === 'undefined') {
+                    console.error('Matomo Tag Manager failed to load after 10 seconds');
+                }
+            }, 10000);
+        })();
     </script>
     <style>
         body {
@@ -392,7 +410,7 @@
             document.getElementById('eventListings').classList.remove('hidden');
             
             // No vendor or event data yet
-            pushToDataLayer('event_list_viewed');
+            pushToDataLayer('Viewed Event List');
         });
         
         // Event Details View
@@ -413,8 +431,8 @@
                 // Show event details section
                 showSection('eventDetails');
                 
-                // Push to data layer for "Viewed Event Details" trigger
-                pushToDataLayer('event_details_viewed');
+                // Push to data layer for "Viewed Event Details" trigger - EXACT MATCH to your trigger name
+                pushToDataLayer('Viewed Event Details');
             });
         });
         
@@ -423,8 +441,8 @@
             // Show venue selection section
             showSection('venueSelection');
             
-            // Push to data layer
-            pushToDataLayer('event_venue_selection_view');
+            // Push to data layer - intermediary step, not a main trigger
+            pushToDataLayer('Viewing Venue Selection');
         });
         
         // Venue Selection Made
@@ -440,8 +458,8 @@
             // Show performance selection section
             showSection('performanceSelection');
             
-            // Push to data layer for "Selected Event Venue" trigger
-            pushToDataLayer('event_venue_selected');
+            // Push to data layer for "Selected Event Venue" trigger - EXACT MATCH to your trigger name
+            pushToDataLayer('Selected Event Venue');
         });
         
         // Performance Selection Made
@@ -460,11 +478,13 @@
             // Start timing seat selection
             bookingData.seatSelectionStartTime = Date.now();
             
-            // Push to data layer for "Selected Event Performance" trigger
-            pushToDataLayer('event_performance_selected');
+            // Push to data layer for "Selected Event Performance" trigger - EXACT MATCH to your trigger name
+            pushToDataLayer('Selected Event Performance');
             
-            // Then push for "Viewed Event Seat Selection" trigger
-            pushToDataLayer('event_seat_selection_viewed');
+            // Then push for "Viewed Event Seat Selection" trigger - EXACT MATCH to your trigger name
+            setTimeout(function() {
+                pushToDataLayer('Viewed Event Seat Selection');
+            }, 500); // Small delay to separate events
         });
 
         // Seat Interaction
@@ -473,7 +493,7 @@
                 this.classList.toggle('selected');
                 
                 // Push seat interaction (this is not one of your main triggers but useful for debugging)
-                pushToDataLayer('event_seat_interaction', {
+                pushToDataLayer('Seat Interaction', {
                     seatArea: this.getAttribute('data-seat-area'),
                     seatId: this.getAttribute('data-seat-id'),
                     seatPrice: this.getAttribute('data-seat-area') === 'PREMIUM' ? 85.50 : 45.00
@@ -519,8 +539,8 @@
             // Show order summary section
             showSection('orderSummary');
             
-            // Push to data layer for "Completed Event Seat Selection" trigger
-            pushToDataLayer('event_seat_selection_completed', {
+            // Push to data layer for "Completed Event Seat Selection" trigger - EXACT MATCH to your trigger name
+            pushToDataLayer('Completed Event Seat Selection', {
                 seatCount: seatCount,
                 seatClass: selectedSeats[0].getAttribute('data-seat-area'),
                 totalValue: totalValue,
@@ -533,8 +553,8 @@
             // Show customer details section
             showSection('customerDetails');
             
-            // Push for "Viewed Event Order Summary" trigger
-            pushToDataLayer('event_order_summary_viewed');
+            // Push for "Viewed Event Order Summary" trigger - EXACT MATCH to your trigger name
+            pushToDataLayer('Viewed Event Order Summary');
         });
         
         // Continue to Payment
@@ -551,8 +571,8 @@
             // Show payment details section
             showSection('paymentDetails');
             
-            // Push for "Added Event Order Personal Details" trigger
-            pushToDataLayer('event_order_personal_details_added', {
+            // Push for "Added Event Order Personal Details" trigger - EXACT MATCH to your trigger name
+            pushToDataLayer('Added Event Order Personal Details', {
                 // Not pushing PII to data layer, but tracking the step
                 customerDetailsProvided: true
             });
@@ -567,8 +587,8 @@
                 return;
             }
             
-            // First push for "Added Event Order Payment Details" trigger
-            pushToDataLayer('event_order_payment_details_added');
+            // First push for "Added Event Order Payment Details" trigger - EXACT MATCH to your trigger name
+            pushToDataLayer('Added Event Order Payment Details');
             
             // Update confirmation page
             document.getElementById('confirmationBookingId').innerText = bookingData.bookingId;
@@ -584,13 +604,16 @@
             const totalMatch = orderText.match(/Total: \$([0-9.]+)/);
             const totalValue = totalMatch ? parseFloat(totalMatch[1]) : 0;
             
-            // Push for "Completed Event Booking" trigger
-            pushToDataLayer('event_booking_completed', {
-                bookingId: bookingData.bookingId,
-                totalValue: totalValue,
-                seatCount: document.querySelectorAll('.seat.selected').length,
-                journeyTime: journeyTime
-            });
+            // Short delay before final event to ensure previous event is processed
+            setTimeout(function() {
+                // Push for "Completed Event Booking" trigger - EXACT MATCH to your trigger name
+                pushToDataLayer('Completed Event Booking', {
+                    bookingId: bookingData.bookingId,
+                    totalValue: totalValue,
+                    seatCount: document.querySelectorAll('.seat.selected').length,
+                    journeyTime: journeyTime
+                });
+            }, 500);
         });
     </script>
 </body>
