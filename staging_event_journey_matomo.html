@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Event Booking Test Page - Matomo Staging</title>
+    <!-- Include Matomo Tag Manager Container -->
+    <script>
+        var _mtm = window._mtm = window._mtm || [];
+        _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
+        (function() {
+            var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+            g.async=true; g.src='http://localhost:8080/js/container_IydHA6TZ.js'; // Update your Matomo URL here
+            s.parentNode.insertBefore(g,s);
+        })();
+        
+        // Debug function to log data layer pushes
+        window.originalMtmPush = window._mtm.push;
+        window._mtm.push = function(obj) {
+            console.log('MTM Data Layer Push:', JSON.stringify(obj, null, 2));
+            return window.originalMtmPush.apply(this, arguments);
+        };
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .section {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .hidden {
+            display: none;
+        }
+        .seat {
+            display: inline-block;
+            margin: 5px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+        .seat.available {
+            background-color: #e0f7e0;
+        }
+        .seat.selected {
+            background-color: #7fbf7f;
+            border-color: #5a8a5a;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        select, input {
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 300px;
+        }
+        .form-row {
+            margin-bottom: 15px;
+        }
+        .event {
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .event:hover {
+            background-color: #e9e9e9;
+        }
+        .testing-controls {
+            margin-top: 50px;
+            padding: 20px;
+            background: #f0f0f0;
+            border-radius: 5px;
+        }
+        .datalayer-display {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Event Booking Test Page - Matomo Staging</h1>
+    <p>Container ID: IydHA6TZ</p>
+    
+    <!-- Testing Controls -->
+    <div class="testing-controls">
+        <h3>Testing Controls</h3>
+        <div class="form-row">
+            <label for="offerTypeSelector">Offer Type:</label>
+            <select id="offerTypeSelector">
+                <option value="events_booking">Events Booking</option>
+                <option value="cinema_tickets">Cinema Tickets</option>
+                <option value="vouchers">Vouchers</option>
+            </select>
+        </div>
+        <div class="form-row">
+            <label for="offerIdInput">Offer ID:</label>
+            <input type="text" id="offerIdInput" value="OFFER789">
+        </div>
+        <div class="form-row">
+            <label for="channelSelector">Channel:</label>
+            <select id="channelSelector">
+                <option value="web">Web</option>
+                <option value="ios_app">iOS App</option>
+                <option value="android_app">Android App</option>
+            </select>
+        </div>
+        <div class="form-row">
+            <label for="customerAccountTypeSelector">Customer Account Type:</label>
+            <select id="customerAccountTypeSelector">
+                <option value="gold">Gold</option>
+                <option value="silver">Silver</option>
+                <option value="bronze">Bronze</option>
+            </select>
+        </div>
+    </div>
+    
+    <!-- Latest Data Layer Push Display -->
+    <div id="dataLayerDisplay" class="datalayer-display">No data layer pushes yet.</div>
+    
+    <!-- Event List Section -->
+    <div id="eventList" class="section">
+        <h2>Available Events</h2>
+        <button id="viewEvents">View Events</button>
+        <div id="eventListings" class="hidden">
+            <div class="event" 
+                 data-event-id="123" 
+                 data-vendor-id="VENDOR123" 
+                 data-vendor-name="TicketMaster"
+                 data-event-title="The Lion King"
+                 data-event-type="Musical">
+                The Lion King - Musical (TicketMaster)
+            </div>
+            <div class="event" 
+                 data-event-id="456" 
+                 data-vendor-id="VENDOR456" 
+                 data-vendor-name="EventBrite"
+                 data-event-title="Champions League Final"
+                 data-event-type="Sport">
+                Champions League Final - Sport (EventBrite)
+            </div>
+            <div class="event" 
+                 data-event-id="789" 
+                 data-vendor-id="VENDOR789" 
+                 data-vendor-name="Live Nation"
+                 data-event-title="Taylor Swift Concert"
+                 data-event-type="Concert">
+                Taylor Swift Concert - Music (Live Nation)
+            </div>
+        </div>
+    </div>
+    
+    <!-- Event Details Section -->
+    <div id="eventDetails" class="section hidden">
+        <h2>Event Details</h2>
+        <h3 id="eventTitle">The Lion King</h3>
+        <p id="eventType">Type: Musical</p>
+        <p id="eventVendor">Vendor: TicketMaster</p>
+        <button id="selectVenue">Select Venue</button>
+    </div>
+    
+    <!-- Venue Selection Section -->
+    <div id="venueSelection" class="section hidden">
+        <h2>Select Venue</h2>
+        <select id="venueOptions">
+            <option value="VENUE1" data-venue-name="Downtown Arena">Downtown Arena</option>
+            <option value="VENUE2" data-venue-name="City Stadium">City Stadium</option>
+            <option value="VENUE3" data-venue-name="Royal Theatre">Royal Theatre</option>
+        </select>
+        <button id="continueToPerformance">Continue to Performance Selection</button>
+    </div>
+    
+    <!-- Performance Selection Section -->
+    <div id="performanceSelection" class="section hidden">
+        <h2>Select Performance</h2>
+        <p id="selectedVenueDisplay">Venue: Downtown Arena</p>
+        <select id="performanceOptions">
+            <option value="PERF1">July 10, 2025 - 7:00 PM</option>
+            <option value="PERF2">July 11, 2025 - 7:00 PM</option>
+            <option value="PERF3">July 12, 2025 - 2:00 PM (Matinee)</option>
+        </select>
+        <button id="continueToSeats">Continue to Seat Selection</button>
+    </div>
+    
+    <!-- Seat Selection Section -->
+    <div id="seatSelection" class="section hidden">
+        <h2>Select Your Seats</h2>
+        <p id="selectedPerformanceDisplay">Performance: July 10, 2025 - 7:00 PM</p>
+        <div id="seatMap">
+            <div class="seat available" data-seat-id="A1" data-seat-area="PREMIUM">A1</div>
+            <div class="seat available" data-seat-id="A2" data-seat-area="PREMIUM">A2</div>
+            <div class="seat available" data-seat-id="B1" data-seat-area="STANDARD">B1</div>
+            <div class="seat available" data-seat-id="B2" data-seat-area="STANDARD">B2</div>
+        </div>
+        <button id="completeSelection">Complete Selection</button>
+    </div>
+    
+    <!-- Order Summary Section -->
+    <div id="orderSummary" class="section hidden">
+        <h2>Order Summary</h2>
+        <div id="orderDetails">
+            <p>Event: The Lion King</p>
+            <p>Venue: Downtown Arena</p>
+            <p>Performance: July 10, 2025 - 7:00 PM</p>
+            <p>Seats: A1, A2</p>
+            <p>Total: $171.00</p>
+        </div>
+        <button id="continueToCustomerDetails">Continue to Customer Details</button>
+    </div>
+    
+    <!-- Customer Details Section -->
+    <div id="customerDetails" class="section hidden">
+        <h2>Customer Details</h2>
+        <div class="form-row">
+            <label for="customerName">Full Name:</label>
+            <input type="text" id="customerName" value="John Doe">
+        </div>
+        <div class="form-row">
+            <label for="customerEmail">Email:</label>
+            <input type="email" id="customerEmail" value="john.doe@example.com">
+        </div>
+        <div class="form-row">
+            <label for="customerPhone">Phone:</label>
+            <input type="tel" id="customerPhone" value="555-123-4567">
+        </div>
+        <button id="continueToPayment">Continue to Payment</button>
+    </div>
+    
+    <!-- Payment Details Section -->
+    <div id="paymentDetails" class="section hidden">
+        <h2>Payment Details</h2>
+        <div class="form-row">
+            <label for="cardNumber">Card Number:</label>
+            <input type="text" id="cardNumber" value="4111 1111 1111 1111">
+        </div>
+        <div class="form-row">
+            <label for="expiryDate">Expiry Date:</label>
+            <input type="text" id="expiryDate" value="12/28">
+        </div>
+        <div class="form-row">
+            <label for="cvv">CVV:</label>
+            <input type="text" id="cvv" value="123">
+        </div>
+        <button id="completeBooking">Complete Booking</button>
+    </div>
+    
+    <!-- Booking Confirmation Section -->
+    <div id="bookingConfirmation" class="section hidden">
+        <h2>Booking Confirmed!</h2>
+        <p>Booking ID: <span id="confirmationBookingId">BOOKING456</span></p>
+        <p>Thank you for your purchase.</p>
+    </div>
+    
+    <script>
+        // Store data throughout the booking journey
+        const bookingData = {
+            journeyStartTime: Date.now(),
+            seatSelectionStartTime: 0,
+            offerType: document.getElementById('offerTypeSelector').value,
+            offerId: document.getElementById('offerIdInput').value,
+            eventId: '',
+            eventTitle: '',
+            eventType: '',
+            vendorId: '',
+            vendorName: '',
+            venueId: '',
+            venueName: '',
+            performanceId: '',
+            performanceName: '',
+            bookingId: 'BOOKING' + Math.floor(Math.random() * 1000),
+            customerAccountType: document.getElementById('customerAccountTypeSelector').value,
+            channel: document.getElementById('channelSelector').value
+        };
+        
+        // Update booking data when testing controls change
+        document.getElementById('offerTypeSelector').addEventListener('change', function() {
+            bookingData.offerType = this.value;
+        });
+        
+        document.getElementById('offerIdInput').addEventListener('change', function() {
+            bookingData.offerId = this.value;
+        });
+        
+        document.getElementById('customerAccountTypeSelector').addEventListener('change', function() {
+            bookingData.customerAccountType = this.value;
+        });
+        
+        document.getElementById('channelSelector').addEventListener('change', function() {
+            bookingData.channel = this.value;
+        });
+        
+        // Helper function to update the data layer display
+        function updateDataLayerDisplay(data) {
+            const displayElement = document.getElementById('dataLayerDisplay');
+            displayElement.textContent = JSON.stringify(data, null, 2);
+        }
+        
+        // Helper function to show a section and hide others
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(function(section) {
+                if (section.id !== 'eventList') { // Always keep the event list visible
+                    section.classList.add('hidden');
+                }
+            });
+            
+            // Show the requested section
+            document.getElementById(sectionId).classList.remove('hidden');
+        }
+        
+        // Helper function to push events to data layer with variable names matching your Matomo setup
+        function pushToDataLayer(eventName, additionalData = {}) {
+            const baseData = {
+                event: eventName,  // This is the critical field for Matomo Tag Manager triggers
+                offerType: bookingData.offerType,
+                offerId: bookingData.offerId,
+                customerAccountType: bookingData.customerAccountType,
+                channel: bookingData.channel
+            };
+            
+            // Add event-specific data if available
+            if (bookingData.eventId) {
+                baseData.eventId = bookingData.eventId;
+            }
+            
+            if (bookingData.eventTitle) {
+                baseData.eventTitle = bookingData.eventTitle;
+            }
+            
+            if (bookingData.eventType) {
+                baseData.eventType = bookingData.eventType;
+            }
+            
+            // Add vendor info if available
+            if (bookingData.vendorName) {
+                baseData.vendorId = bookingData.vendorId;
+                baseData.vendorName = bookingData.vendorName;
+            }
+            
+            // Add venue info if available
+            if (bookingData.venueId) {
+                baseData.venueId = bookingData.venueId;
+                baseData.venueName = bookingData.venueName;
+            }
+            
+            // Add performance info if available
+            if (bookingData.performanceId) {
+                baseData.performanceId = bookingData.performanceId;
+                baseData.performanceName = bookingData.performanceName;
+            }
+            
+            // Combine base data with any additional data
+            const finalData = {...baseData, ...additionalData};
+            
+            // Push to data layer
+            window._mtm = window._mtm || [];
+            window._mtm.push(finalData);
+            
+            // Update the display
+            updateDataLayerDisplay(finalData);
+            
+            // Log for debugging
+            console.log('Data Layer Push:', finalData);
+        }
+        
+        // Event List View
+        document.getElementById('viewEvents').addEventListener('click', function() {
+            // Show the event listings
+            document.getElementById('eventListings').classList.remove('hidden');
+            
+            // No vendor or event data yet
+            pushToDataLayer('event_list_viewed');
+        });
+        
+        // Event Details View
+        document.querySelectorAll('.event').forEach(function(element) {
+            element.addEventListener('click', function() {
+                // Store event data
+                bookingData.eventId = this.getAttribute('data-event-id');
+                bookingData.vendorId = this.getAttribute('data-vendor-id');
+                bookingData.vendorName = this.getAttribute('data-vendor-name');
+                bookingData.eventTitle = this.getAttribute('data-event-title');
+                bookingData.eventType = this.getAttribute('data-event-type');
+                
+                // Update display
+                document.getElementById('eventTitle').innerText = bookingData.eventTitle;
+                document.getElementById('eventType').innerText = 'Type: ' + bookingData.eventType;
+                document.getElementById('eventVendor').innerText = 'Vendor: ' + bookingData.vendorName;
+                
+                // Show event details section
+                showSection('eventDetails');
+                
+                // Push to data layer for "Viewed Event Details" trigger
+                pushToDataLayer('event_details_viewed');
+            });
+        });
+        
+        // Venue Selection View
+        document.getElementById('selectVenue').addEventListener('click', function() {
+            // Show venue selection section
+            showSection('venueSelection');
+            
+            // Push to data layer
+            pushToDataLayer('event_venue_selection_view');
+        });
+        
+        // Venue Selection Made
+        document.getElementById('continueToPerformance').addEventListener('click', function() {
+            // Store venue data
+            const venueSelect = document.getElementById('venueOptions');
+            bookingData.venueId = venueSelect.value;
+            bookingData.venueName = venueSelect.options[venueSelect.selectedIndex].getAttribute('data-venue-name');
+            
+            // Update display
+            document.getElementById('selectedVenueDisplay').innerText = 'Venue: ' + bookingData.venueName;
+            
+            // Show performance selection section
+            showSection('performanceSelection');
+            
+            // Push to data layer for "Selected Event Venue" trigger
+            pushToDataLayer('event_venue_selected');
+        });
+        
+        // Performance Selection Made
+        document.getElementById('continueToSeats').addEventListener('click', function() {
+            // Store performance data
+            const performanceSelect = document.getElementById('performanceOptions');
+            bookingData.performanceId = performanceSelect.value;
+            bookingData.performanceName = performanceSelect.options[performanceSelect.selectedIndex].text;
+            
+            // Update display
+            document.getElementById('selectedPerformanceDisplay').innerText = 'Performance: ' + bookingData.performanceName;
+            
+            // Show seat selection section
+            showSection('seatSelection');
+            
+            // Start timing seat selection
+            bookingData.seatSelectionStartTime = Date.now();
+            
+            // Push to data layer for "Selected Event Performance" trigger
+            pushToDataLayer('event_performance_selected');
+            
+            // Then push for "Viewed Event Seat Selection" trigger
+            pushToDataLayer('event_seat_selection_viewed');
+        });
+
+        // Seat Interaction
+        document.querySelectorAll('.seat').forEach(function(element) {
+            element.addEventListener('click', function() {
+                this.classList.toggle('selected');
+                
+                // Push seat interaction (this is not one of your main triggers but useful for debugging)
+                pushToDataLayer('event_seat_interaction', {
+                    seatArea: this.getAttribute('data-seat-area'),
+                    seatId: this.getAttribute('data-seat-id'),
+                    seatPrice: this.getAttribute('data-seat-area') === 'PREMIUM' ? 85.50 : 45.00
+                });
+            });
+        });
+
+        // Complete Seat Selection
+        document.getElementById('completeSelection').addEventListener('click', function() {
+            // Calculate time spent selecting
+            const timeSpent = Math.floor((Date.now() - bookingData.seatSelectionStartTime) / 1000);
+            
+            // Count selected seats
+            const selectedSeats = document.querySelectorAll('.seat.selected');
+            const seatCount = selectedSeats.length;
+            
+            if (seatCount === 0) {
+                alert('Please select at least one seat to continue.');
+                return;
+            }
+            
+            // Collect selected seat IDs and calculate total
+            let selectedSeatIds = [];
+            let totalValue = 0;
+            selectedSeats.forEach(function(seat) {
+                const seatId = seat.getAttribute('data-seat-id');
+                selectedSeatIds.push(seatId);
+                
+                // Calculate total value
+                const seatPrice = seat.getAttribute('data-seat-area') === 'PREMIUM' ? 85.50 : 45.00;
+                totalValue += seatPrice;
+            });
+            
+            // Update order summary details
+            document.getElementById('orderDetails').innerHTML = `
+                <p>Event: ${bookingData.eventTitle}</p>
+                <p>Venue: ${bookingData.venueName}</p>
+                <p>Performance: ${bookingData.performanceName}</p>
+                <p>Seats: ${selectedSeatIds.join(', ')}</p>
+                <p>Total: $${totalValue.toFixed(2)}</p>
+            `;
+            
+            // Show order summary section
+            showSection('orderSummary');
+            
+            // Push to data layer for "Completed Event Seat Selection" trigger
+            pushToDataLayer('event_seat_selection_completed', {
+                seatCount: seatCount,
+                seatClass: selectedSeats[0].getAttribute('data-seat-area'),
+                totalValue: totalValue,
+                timeSpentSelecting: timeSpent
+            });
+        });
+
+        // Continue to Customer Details
+        document.getElementById('continueToCustomerDetails').addEventListener('click', function() {
+            // Show customer details section
+            showSection('customerDetails');
+            
+            // Push for "Viewed Event Order Summary" trigger
+            pushToDataLayer('event_order_summary_viewed');
+        });
+        
+        // Continue to Payment
+        document.getElementById('continueToPayment').addEventListener('click', function() {
+            // Store customer data (would usually be validated)
+            const customerName = document.getElementById('customerName').value;
+            const customerEmail = document.getElementById('customerEmail').value;
+            
+            if (!customerName || !customerEmail) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            // Show payment details section
+            showSection('paymentDetails');
+            
+            // Push for "Added Event Order Personal Details" trigger
+            pushToDataLayer('event_order_personal_details_added', {
+                // Not pushing PII to data layer, but tracking the step
+                customerDetailsProvided: true
+            });
+        });
+        
+        // Complete Booking
+        document.getElementById('completeBooking').addEventListener('click', function() {
+            // Basic validation
+            const cardNumber = document.getElementById('cardNumber').value;
+            if (!cardNumber) {
+                alert('Please enter payment details to complete your booking.');
+                return;
+            }
+            
+            // First push for "Added Event Order Payment Details" trigger
+            pushToDataLayer('event_order_payment_details_added');
+            
+            // Update confirmation page
+            document.getElementById('confirmationBookingId').innerText = bookingData.bookingId;
+            
+            // Show confirmation section
+            showSection('bookingConfirmation');
+            
+            // Calculate total journey time
+            const journeyTime = Math.floor((Date.now() - bookingData.journeyStartTime) / 1000);
+            
+            // Get total value from order summary
+            const orderText = document.getElementById('orderDetails').innerText;
+            const totalMatch = orderText.match(/Total: \$([0-9.]+)/);
+            const totalValue = totalMatch ? parseFloat(totalMatch[1]) : 0;
+            
+            // Push for "Completed Event Booking" trigger
+            pushToDataLayer('event_booking_completed', {
+                bookingId: bookingData.bookingId,
+                totalValue: totalValue,
+                seatCount: document.querySelectorAll('.seat.selected').length,
+                journeyTime: journeyTime
+            });
+        });
+    </script>
+</body>
+</html>
